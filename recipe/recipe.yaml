@@ -9,21 +9,18 @@ package:
   version: ${{ version }}
 
 source:
-  - url: https://ftp.gnu.org/gnu/gawk/gawk-${{ version }}.tar.gz
+  - url:
+      - https://ftp.gnu.org/gnu/gawk/gawk-${{ version }}.tar.gz
+      - https://ftpmirror.gnu.org/gnu/gawk/gawk-${{ version }}.tar.gz
     sha256: 8b3b0ea83930311a3f30905d3ce898d32c6103c2fe20d6a90b40341171b174de
     patches:
       - if: osx
         then: 0007-osx-map-anonymous.patch
-  - file_name: bootstrap.sh
-    url: http://git.savannah.gnu.org/cgit/gawk.git/plain/bootstrap.sh?h=gawk-${{ version }}
-    sha256: 8aaf0cb1653e4c9535a906cf1cad04eb3f7877e554300139754dba48fb5f8bd2
 
 build:
-  number: 1
+  number: 2
   skip: not unix
   script:
-    # just sets some timestamps
-    - bash ./bootstrap.sh
     - |-
       bash ./configure \
         --prefix="${PREFIX}" \
@@ -54,6 +51,24 @@ requirements:
     - mpfr
 
 tests:
+  - package_contents:
+      strict: true
+      bin:
+        - awk
+        - gawk
+        - gawk-${{ version }}
+        - gawkbug
+      files:
+        - etc/profile.d/gawk.*
+        - include/gawkapi.h
+        - lib/gawk/**
+        - libexec/awk/**
+        - share/awk/**
+        - share/info/gawk*
+        - share/info/pm-gawk.*
+        - share/locale/*/LC_MESSAGES/gawk.mo
+        - share/man/man1/{gawk,gawkbug,pm-gawk}.1
+        - share/man/man3/{filefuncs,fnmatch,fork,inplace,intdiv,ordchr,readdir,readfile,revoutput,revtwoway,rwarray,time}.3am
   - script:
       - gawk --version | grep -iE "${{ version | replace(".", "\\.") }}"
       - gawk --help
